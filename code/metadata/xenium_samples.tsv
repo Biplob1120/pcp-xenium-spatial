@@ -1,0 +1,12 @@
+gsm	sample	group	day_post_infection	strain_note
+GSM9694495	UN_1	uninfected	0	uninfected control
+GSM9694496	UN_2	uninfected	0	uninfected control
+GSM9694497	WT_1	WT_infected	NA	wild-type C. neoformans (TODO: confirm timepoint in paper PMC13392052)
+GSM9694498	WT_2	WT_infected	NA	wild-type C. neoformans (TODO: confirm timepoint)
+GSM9694499	G30_1	granuloma	30	C. neoformans delta-gcs1 granuloma
+GSM9694500	G30_2	granuloma	30	C. neoformans delta-gcs1 granuloma
+GSM9694501	G30_3	granuloma	30	C. neoformans delta-gcs1 granuloma
+GSM9694502	G60_1	granuloma	60	C. neoformans delta-gcs1 granuloma
+GSM9694503	G60_2	granuloma	60	C. neoformans delta-gcs1 granuloma
+GSM9694504	G90_1	granuloma	90	C. neoformans delta-gcs1 granuloma
+GSM9694505	G90_2	granuloma	90	C. neoformans delta-gcs1 granuloma

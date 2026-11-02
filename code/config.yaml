@@ -1,0 +1,23 @@
+# Edit paths after download (TODO)
+data_dir: data                 # same as DATA in 00_download_geo.sbatch
+xenium_dir: data/xenium
+scrna_dir: data/scrna
+out_dir: results
+xenium_samples: metadata/xenium_samples.tsv
+scrna_samples: metadata/scrna_samples.tsv
+seed: 0
+qc:
+  min_counts: 20               # Xenium 5K: tune after looking at 01 QC plots
+  min_genes: 10
+  max_neg_control_frac: 0.05
+  min_cell_area: 6
+  max_cell_area: 600
+niche:
+  n_neighbors: 15              # kNN for neighbourhood composition
+  radius_um: 50
+  n_niches: 10
+  lesion_bandwidth_um: 40
+  lesion_min_mac_frac: 0.4       # fraction of macrophage-lineage cells within lesion_bandwidth_um
+  lesion_density_quantile: 0.5   # and local cell density above this per-sample quantile
+  lesion_min_cells: 20
+  lesion_require_giant_program: false   # set true to also require Dcstamp/Ocstamp/Acp5/Ctsk score

@@ -1,0 +1,38 @@
+# conda/mamba environment for the PCP-spatial portfolio project
+# Create on Cypress:  module load anaconda   (TODO: check exact module name with `module avail`)
+#                     mamba env create -f env/environment.yml   (or conda env create)
+name: pcp_spatial
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.11
+  - numpy
+  - pandas
+  - scipy
+  - pyarrow
+  - h5py
+  - anndata>=0.10
+  - scanpy>=1.10
+  - squidpy>=1.5
+  - leidenalg
+  - python-igraph
+  - scikit-learn
+  - statsmodels
+  - geopandas
+  - shapely>=2
+  - matplotlib
+  - seaborn
+  - tifffile
+  - zarr<3
+  - pyyaml
+  - jupyterlab
+  - ipykernel
+  - pip
+  - pip:
+      - spatialdata>=0.2
+      - spatialdata-io>=0.1.5
+      - spatialdata-plot
+      - celltypist>=1.6
+      - harmonypy
+      - scvi-tools>=1.1      # optional: scANVI label transfer (GPU recommended)

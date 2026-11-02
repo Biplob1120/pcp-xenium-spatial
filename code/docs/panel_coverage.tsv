@@ -1,0 +1,34 @@
+gene	in_GSE328931_panel	source	why_it_matters
+Trem2	yes	5K base	PCP-associated macrophage (PAM) marker, GSE157627
+Mmp12	yes	5K base	protective macrophage, GSE225246
+Il17a	yes	5K base	Th17 effector (Kolls)
+Il22	yes	5K base	Th17/Th22 effector (Kolls)
+Rorc	yes	5K base	Th17 TF
+Cd4	yes	5K base	CD4 T cells (key in PCP)
+Cd8a	yes	5K base	CD8 T cells
+Spp1	NO	-	granuloma/lipid macrophage
+Arg1	yes	5K base	M2-like/alternatively activated
+Nos2	yes	5K base	M1-like/IFN-g activated
+Clec7a	NO	-	Dectin-1, beta-glucan receptor
+Itgax	yes	5K base	CD11c, AM/DC
+Siglecf	NO	-	alveolar macrophage/eosinophil
+Cxcl13	yes	5K base	TLS/iBALT
+Ccl19	yes	5K base	TLS/iBALT
+Ccr7	yes	5K base	naive/central memory T, mature DC
+Il17f	yes	5K base	Th17
+Il23r	yes	5K base	Th17
+Ifng	yes	5K base	Th1
+Il6	NO	-	Th17-polarizing cytokine
+Ly6c2	NO	-	inflammatory monocyte
+Lyz2	NO	-	myeloid
+S100a8	NO	-	neutrophil
+Sftpc	NO	-	AT2
+Clec4n	yes	5K base	Dectin-2
+Clec4e	yes	5K base	Mincle
+Il22ra1	yes	5K base	IL-22 receptor (epithelium)
+Lcn2	NO	-	IL-17/IL-22 target
+Retnla	NO	-	M2/alt. activation
+Ear2	NO	-	alveolar macrophage
+Dcstamp	yes	custom add-on	fused/giant macrophage (custom add-on)
+Il1b	yes	custom add-on	inflammation (custom add-on)
+H2-Ab1	yes	custom add-on	MHC-II (custom add-on)
