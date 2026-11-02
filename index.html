@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spatial niches of fungal lung infection | Xenium analysis</title>
+<title>Immune niches in Cryptococcus-infected lung | Xenium analysis</title>
 <style>
   :root{--ink:#1d2433;--muted:#5b6475;--accent:#1f78b4;--bg:#fafbfc;--card:#fff;--line:#e3e7ee}
   *{box-sizing:border-box}
@@ -33,96 +33,125 @@
   ol.pipe li{margin-bottom:6px}
   .note{background:#fff8e6;border-left:4px solid #f0a500;padding:12px 16px;border-radius:4px}
   code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.9em}
+  .src{display:block;color:var(--muted);font-size:.85rem;margin-top:4px}
   footer{text-align:center;color:var(--muted);font-size:.9rem;padding:30px 20px 50px}
   a{color:var(--accent)}
 </style>
 </head>
 <body>
 <header><div class="wrap">
-  <h1>Spatial niches of fungal lung infection: a 10x Xenium analysis</h1>
-  <p>Mapping macrophage, monocyte and lymphocyte programs around fungal lesions across a lung granuloma time course</p>
+  <h1>Mapping immune niches in <i>Cryptococcus</i>-infected lung with Xenium spatial transcriptomics</h1>
+  <p>A spatial analysis workflow integrating cell-type annotation, neighborhood profiling, and lesion-associated gene programs across infection conditions and granuloma time points</p>
   <p><b>Md Biplob Hosen</b> · PhD student, Biomedical Sciences · Kolls Lab, Tulane University</p>
-  <div class="tags"><span>10x Xenium Prime 5K</span><span>Python · scanpy</span><span>CellTypist label transfer</span><span>Spatial niches</span><span>SLURM / HPC</span></div>
+  <div class="tags"><span>10x Xenium Prime 5K</span><span>Python · scanpy</span><span>CellTypist label transfer</span><span>Spatial neighborhoods</span><span>SLURM / HPC</span></div>
 </div></header>
 
 <nav><div class="wrap">
   <a href="#overview">Overview</a><a href="#data">Data</a><a href="#methods">Methods</a>
   <a href="#results">Results</a><a href="#findings">Key findings</a><a href="#limits">Limitations</a>
-  <a href="#next">Next steps</a><a href="https://github.com/Biplob1120/pcp-xenium-spatial/tree/main/code">Code</a>
+  <a href="#next">Next steps</a><a href="#refs">References</a><a href="https://github.com/Biplob1120/pcp-xenium-spatial/tree/main/code">Code</a>
 </div></nav>
 
 <main>
 <section id="overview">
   <h2>Overview</h2>
-  <p>Single-cell studies of <i>Pneumocystis</i> pneumonia (PCP) have identified the host cells that drive fungal clearance, including Trem2-high macrophages and effector CD4 T cells. Single-cell data cannot show <i>where</i> these cells sit relative to the fungus. Spatial transcriptomics can.</p>
-  <p>No public spatial dataset of <i>Pneumocystis</i>-infected lung exists yet. This project builds and tests a complete spatial analysis pipeline on the closest public fungal lung atlas, a mouse <i>Cryptococcus neoformans</i> Xenium time course. It uses <i>Pneumocystis</i> lung single-cell data as the annotation reference. The same pipeline can be applied directly to future <i>Pneumocystis</i> Xenium data.</p>
+  <p>Understanding how immune cells are organized within infected lung tissue is essential for interpreting local host responses. Single-cell RNA sequencing characterizes cellular diversity and transcriptional states but does not retain the spatial relationships between immune cells and the surrounding tissue.</p>
+  <p>This project develops and evaluates a spatial analysis workflow using a public Xenium dataset of mouse lungs infected with <i>Cryptococcus neoformans</i> [1]. Single-cell RNA-sequencing datasets from <i>Pneumocystis</i>-infected lungs [2, 3] provide a reference for cell-type annotation, complemented by canonical marker-based review.</p>
+  <p>The analysis integrates cell-type mapping, neighborhood composition, lesion-associated spatial organization, and immune gene-program scoring across infection conditions and granuloma time points. The broader objective is to establish a computational foundation for future spatial studies of <i>Pneumocystis</i> infection, with dataset-specific adaptation and validation.</p>
+  <p><b>Study objective:</b> To characterize differences in immune-cell composition and spatial organization across uninfected lung, wild-type infection, and granuloma time points.</p>
   <div class="stats">
     <div class="stat"><b>2,416,057</b>cells after QC</div>
-    <div class="stat"><b>11</b>lung sections</div>
-    <div class="stat"><b>5</b>conditions</div>
+    <div class="stat"><b>11</b>tissue sections</div>
+    <div class="stat"><b>5</b>experimental groups</div>
     <div class="stat"><b>5,052</b>genes on panel</div>
   </div>
 </section>
 
 <section id="data">
   <h2>Data</h2>
+  <h3>Spatial dataset</h3>
   <table>
-    <tr><th>Dataset</th><th>Type</th><th>Use in this project</th></tr>
-    <tr><td><a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE328931">GSE328931</a></td><td>10x Xenium Prime 5K, mouse lung, <i>C. neoformans</i></td><td>Spatial query: 11 sections</td></tr>
-    <tr><td><a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE157627">GSE157627</a></td><td>scRNA-seq, <i>Pneumocystis</i>-infected mouse lung</td><td>Annotation reference</td></tr>
-    <tr><td><a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE225246">GSE225246</a></td><td>scRNA-seq, <i>Pneumocystis</i> lung with glucocorticoids</td><td>Annotation reference</td></tr>
+    <tr><th>Field</th><th>Description</th></tr>
+    <tr><td>Source</td><td><a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE328931">GSE328931</a> (Del Poeta lab, Stony Brook University) [1]</td></tr>
+    <tr><td>Platform</td><td>10x Xenium Prime, Mouse 5K Pan Tissue &amp; Pathways panel plus a custom add-on panel (5,052 genes in the deposited matrices)</td></tr>
+    <tr><td>Biological material</td><td>Mouse lung tissue, FFPE, 5 µm sections</td></tr>
+    <tr><td>Experimental groups</td><td>Uninfected (UN); wild-type <i>C. neoformans</i> H99 infection (WT); Δ<i>gcs1</i> granuloma model (G30, G60, G90)</td></tr>
+    <tr><td>Sampling time</td><td>UN: uninfected control · WT: 15 days post-infection (as reported for this study in [1]) · G30 / G60 / G90: 30, 60 and 90 days post-infection</td></tr>
+    <tr><td>Tissue sections</td><td>UN 2 · WT 2 · G30 3 · G60 2 · G90 2 (11 total)</td></tr>
+    <tr><td>Biological replicates</td><td>The number of independent animals behind the Xenium sections is not stated in the GEO record or the publication. In this analysis, each section is treated as one sampling unit; sections are not assumed to be independent animals, and cells are never treated as replicates.</td></tr>
   </table>
-  <p><b>Conditions:</b> UN = uninfected (2 sections) · WT = wild-type <i>C. neoformans</i> infection (2) · G30 / G60 / G90 = Δ<i>gcs1</i> granuloma model at days 30, 60 and 90 (3, 2, 2).</p>
+  <h3>Annotation references</h3>
+  <table>
+    <tr><th>Dataset</th><th>Content</th><th>How it was used</th></tr>
+    <tr><td><a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE157627">GSE157627</a> [2]</td><td>scRNA-seq, CD45+ lung cells, <i>Pneumocystis</i> infection weeks 0–5 (6 samples)</td><td rowspan="2">Combined into one reference after per-sample QC and Harmony batch correction; used to train a CellTypist model for immune sub-states</td></tr>
+    <tr><td><a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE225246">GSE225246</a> [3]</td><td>scRNA-seq, whole lung: control, <i>Pneumocystis</i>, dexamethasone, dexamethasone + <i>Pneumocystis</i> (3 each)</td></tr>
+  </table>
 </section>
 
 <section id="methods">
   <h2>Methods</h2>
-  <ol class="pipe">
-    <li><b>Load and QC</b> (<code>01_load_qc.py</code>): Xenium outputs per section, cell filtering on counts, genes, negative-control fraction and cell area, then normalization.</li>
-    <li><b>Reference</b> (<code>02_reference_scRNA.py</code>): <i>Pneumocystis</i> lung scRNA-seq data harmonized and restricted to genes on the Xenium panel, then a CellTypist model trained.</li>
-    <li><b>Two-tier annotation</b> (<code>03_annotate_label_transfer.py</code>): clusters get a broad lineage from canonical markers, and CellTypist assigns the sub-state within that lineage. Labels were then checked against marker dot plots and corrected where markers disagreed.</li>
-    <li><b>Spatial niches and lesions</b> (<code>04_spatial_niches.py</code>): neighbourhood composition (50 µm radius) clustered into 10 niches. Lesions defined as dense, macrophage-rich regions, with distance rings drawn around each lesion.</li>
-    <li><b>Time course</b> (<code>05_timecourse_stats.py</code>): cell-type composition and gene-program scores (e.g. Th1/IFN-γ, M1-like, C-type lectin fungal sensing, TLS/iBALT) compared across conditions.</li>
-    <li><b>Figures</b> (<code>06_portfolio_figures.py</code>): a fixed colour per cell type across every figure.</li>
-  </ol>
-  <p>All steps run as SLURM jobs on Tulane's Cypress HPC cluster in a reproducible conda environment (<code>code/env/environment.yml</code>).</p>
+
+  <h3>Data preprocessing and quality control</h3>
+  <p>Cell-by-gene matrices and cell centroids were read per section. Cells were retained if they had ≥20 transcripts, ≥10 detected genes, a negative-control/unassigned codeword fraction ≤5%, and a segmented cell area between 6 and 600 µm². Counts were scaled to the median library size and log-transformed; PCA (50 components), a 15-nearest-neighbor graph, UMAP and Leiden clustering (resolutions 0.3, 0.6, 1.0) followed. <span class="src">Script: <code>01_load_qc.py</code></span></p>
+
+  <h3>Reference preparation and cell-type annotation</h3>
+  <p><b>Reference.</b> The 18 <i>Pneumocystis</i> scRNA-seq samples were filtered (≥200 genes, &lt;25% mitochondrial reads), normalized (10,000 counts per cell, log-transformed), reduced to 3,000 batch-aware highly variable genes, and batch-corrected with Harmony [7] on dataset and sample. Reference labels were assigned per Leiden cluster from marker-gene scores, with Trem2-high (PAM), Mmp12+ and Th17-like sub-states defined by cluster-level program scores. <span class="src">Script: <code>02_reference_scRNA.py</code></span></p>
+  <p><b>Annotation.</b> Cell types were assigned using a two-stage annotation strategy. Broad lineages were identified per Xenium cluster (Leiden 1.0) from the highest mean score of panel-verified canonical markers. CellTypist [4], trained only on genes shared by the reference and the Xenium panel, then resolved finer states within compatible lineages; a sub-state was accepted only when its probability was ≥0.3, otherwise the cell kept its lineage label. Transferred labels were reviewed against marker-expression profiles, and discrepancies were documented and curated (see Annotation review below). <span class="src">Script: <code>03_annotate_label_transfer.py</code></span></p>
+  <div class="note" style="font-size:.93rem"><b>Annotation review.</b> Three labels were corrected after marker review; each change and its reason are recorded in the annotation script.
+  <ul style="margin:6px 0 0">
+    <li>A cluster labeled "Plasma" expressed <i>Cd19</i>, <i>Ms4a1</i> and <i>Cd79a</i> much more than <i>Jchain</i> and <i>Mzb1</i>, so it was relabeled <b>B cells</b>.</li>
+    <li>A transferred "Th17" state expressed <i>Mki67</i> and <i>Top2a</i> without <i>Rorc</i> or <i>Il17a</i>, so it was relabeled <b>proliferating T cells</b>. Th17 activity is assessed separately with a gene-program score.</li>
+    <li>A small "Neutrophil" cluster showed little <i>Csf3r</i> or <i>Cxcr2</i> signal, so it was merged into <b>Myeloid other</b>.</li>
+  </ul></div>
+
+  <h3>Spatial neighborhood analysis</h3>
+  <p>For each cell, the cell-type composition of its 15 nearest neighbors (within the same section) was computed. These composition vectors were pooled across sections and clustered with mini-batch k-means into 10 neighborhood clusters ("niches"). The number of niches was fixed in advance as an exploratory setting and was not optimized. Per-section neighborhood enrichment was also computed with Squidpy [5] on a 50 µm radius graph. <span class="src">Script: <code>04_spatial_niches.py</code></span></p>
+
+  <h3>Lesion-associated spatial profiling</h3>
+  <p>The panel contains no fungal probes, so lesions were not identified from fungal signal. Putative lesion regions were identified computationally as dense, macrophage-rich areas: cells whose 40 µm neighborhood contained ≥40% macrophage-lineage cells and whose local cell density was at or above the section median, grouped with DBSCAN (≥10 cells per group). Distance was calculated to the nearest lesion-region cell as an approximation of distance from the region boundary. Cells within the selected regions were assigned to the core. Distances were binned into rings: core, 0–25, 25–50, 50–100, 100–200, 200–400 and &gt;400 µm. <span class="src">Script: <code>04_spatial_niches.py</code></span></p>
+
+  <h3>Gene-program scoring and group-level comparisons</h3>
+  <p>Gene programs (e.g., Th1/IFN-γ: <i>Ifng, Cxcl9, Cxcl10, Gbp2, Irf1</i>; M1-like: <i>Nos2, Il1b, Tnf, Cxcl2</i>; C-type lectin fungal sensing: <i>Clec4n, Clec4e, Cd209a</i>; TLS/iBALT: <i>Cxcl13, Ccl19, Ccr7, Ms4a1</i>; Th17: <i>Rorc, Il17a, Il17f, Il22, Il23r</i>) were scored per cell with scanpy's <code>score_genes</code> (mean expression relative to a matched random gene set). Full gene lists are in <code>code/scripts/common.py</code>. Composition and program scores were summarized per section. Figure 4 displays section-level composition, while Figures 5–6 show individual sections and group means. Figure 7 pools cells within each group. Granuloma time trends were assessed with Spearman correlation across the seven granuloma sections and are reported as exploratory. <span class="src">Script: <code>05_timecourse_stats.py</code></span></p>
+
+  <h3>Computational implementation and reproducibility</h3>
+  <p>All steps run as SLURM jobs on Tulane's Cypress HPC cluster using Python (scanpy [6], CellTypist, Squidpy, harmonypy) in a conda environment specified in <a href="https://github.com/Biplob1120/pcp-xenium-spatial/blob/main/code/env/environment.yml"><code>environment.yml</code></a>. Parameters are in <a href="https://github.com/Biplob1120/pcp-xenium-spatial/blob/main/code/config.yaml"><code>config.yaml</code></a>, and the random seed is fixed. Each cell type keeps the same colour in every figure.</p>
 </section>
 
 <section id="results">
   <h2>Results</h2>
 
-  <figure><img src="figures/fig1_umap_celltype_condition.png" alt="UMAP of cell types and conditions" onclick="window.open(this.src)">
-  <figcaption><b>Figure 1. Cell-type atlas.</b> UMAP of a 150,000-cell subsample, coloured by annotated cell type (left) and condition (right). Epithelial, stromal, myeloid and lymphoid lineages separate cleanly.</figcaption></figure>
+  <figure><img src="figures/fig1_umap_celltype_condition.png" alt="UMAP of cell types and groups" onclick="window.open(this.src)">
+  <figcaption><b>Figure 1. Cell-type atlas.</b> UMAP visualization of 150,000 randomly sampled cells, colored by annotated cell type (left) and experimental group (right). Major epithelial, stromal, myeloid, and lymphoid populations occupy distinct regions of the embedding.</figcaption></figure>
 
-  <figure><img src="figures/fig2_spatial_celltypes_by_condition.png" alt="Spatial maps by condition" onclick="window.open(this.src)">
-  <figcaption><b>Figure 2. Tissue maps.</b> The largest section per condition, every cell placed at its true position. Infected lungs show dense immune foci that are absent in uninfected lung.</figcaption></figure>
+  <figure><img src="figures/fig2_spatial_celltypes_by_condition.png" alt="Spatial maps by group" onclick="window.open(this.src)">
+  <figcaption><b>Figure 2. Tissue maps.</b> Spatial distributions of annotated cell types in the largest analyzed section from each experimental group. The maps illustrate differences in immune-cell aggregation and tissue organization.</figcaption></figure>
 
-  <figure><img src="figures/fig3_lesion_zoom_immune.png" alt="Lesion zoom" onclick="window.open(this.src)">
-  <figcaption><b>Figure 3. Inside a lesion.</b> A 1.4 mm window around the largest lesion, showing how immune cell types are arranged at single-cell resolution.</figcaption></figure>
+  <figure><img src="figures/fig3_lesion_zoom_immune.png" alt="Putative lesion zoom" onclick="window.open(this.src)">
+  <figcaption><b>Figure 3. Putative lesion regions.</b> A 1.4 mm window centered on the largest computationally defined lesion region in the section shown in Figure 2 for each infected group. Immune cells are colored by type; non-immune cells are grey.</figcaption></figure>
 
-  <figure><img src="figures/fig4_composition_stacked.png" alt="Composition per sample" onclick="window.open(this.src)">
-  <figcaption><b>Figure 4. Cell-type composition per section.</b> Proportions are shown rather than counts because section sizes differ.</figcaption></figure>
+  <figure><img src="figures/fig4_composition_stacked.png" alt="Composition per section" onclick="window.open(this.src)">
+  <figcaption><b>Figure 4. Cell-type composition per section.</b> Percentage of each cell type among all QC-passing cells in each section. Proportions are shown because section sizes differ.</figcaption></figure>
 
-  <figure><img src="figures/fig5_immune_fraction_by_condition.png" alt="Immune fraction" onclick="window.open(this.src)">
-  <figcaption><b>Figure 5. Immune cell fractions by condition.</b> Monocytes and macrophages expand strongly in WT infection, while B cells increase progressively across granuloma time points.</figcaption></figure>
+  <figure><img src="figures/fig5_immune_fraction_by_condition.png" alt="Immune fractions" onclick="window.open(this.src)">
+  <figcaption><b>Figure 5. Immune-cell proportions by group.</b> Section-level immune-cell proportions (dots = sections; bars = mean of sections). WT-infected sections show higher monocyte and macrophage proportions, whereas B-cell proportions are higher at later granuloma time points.</figcaption></figure>
 
   <figure><img src="figures/fig6_programs_by_condition.png" alt="Gene programs" onclick="window.open(this.src)">
-  <figcaption><b>Figure 6. Immune gene programs.</b> Th1/IFN-γ, M1-like and C-type lectin fungal-sensing programs peak in WT infection. A tertiary lymphoid / iBALT program is highest at granuloma day 90.</figcaption></figure>
+  <figcaption><b>Figure 6. Immune gene-program scores.</b> Mean program score per section (dots = sections; line = group mean). Th1/IFN-γ, M1-like and C-type lectin fungal-sensing scores are highest in WT-infected sections; the TLS/iBALT score is highest at granuloma day 90.</figcaption></figure>
 
-  <figure><img src="figures/fig7_celltypes_by_lesion_distance.png" alt="Cell types by lesion distance" onclick="window.open(this.src)">
-  <figcaption><b>Figure 7. Lesion architecture.</b> Cell-type fractions by distance from the lesion core. Monocytes and macrophages fill the core, CD4 T cells and B cells form a rim about 25–200 µm out, and alveolar epithelium (AT1/AT2) returns further away.</figcaption></figure>
+  <figure><img src="figures/fig7_celltypes_by_lesion_distance.png" alt="Cell types by distance" onclick="window.open(this.src)">
+  <figcaption><b>Figure 7. Composition by distance from putative lesion regions.</b> Cell-type proportions across distance bands from computationally defined lesion regions, using the nearest lesion-region cell as the distance reference; cells are pooled within each group. Myeloid populations are concentrated in the core and nearest bands, CD4 T cells and B cells are relatively enriched at roughly 25–200 µm, and alveolar epithelial populations are more prevalent at greater distances. Because regions were defined by macrophage enrichment, the myeloid-rich core partly reflects the definition itself. Patterns in surrounding lymphocyte and epithelial populations provide additional descriptive information about local tissue organization.</figcaption></figure>
 
   <figure><img src="figures/fig8_niche_composition.png" alt="Niche composition" onclick="window.open(this.src)">
-  <figcaption><b>Figure 8. Spatial niches.</b> Cell-type makeup of the 10 neighbourhood niches. One niche is dominated by B cells, consistent with organized iBALT-like lymphoid structures.</figcaption></figure>
+  <figcaption><b>Figure 8. Spatial neighborhood clusters.</b> Cell-type composition of 10 neighborhood clusters. A B-cell-enriched neighborhood identifies a candidate lymphoid niche for further characterization.</figcaption></figure>
 </section>
 
 <section id="findings">
   <h2>Key findings</h2>
   <ul>
-    <li><b>Acute infection is myeloid-driven.</b> WT-infected lungs contain tens of thousands of monocytes and macrophages per section, versus almost none in uninfected lung.</li>
-    <li><b>Lesions are layered.</b> A myeloid core is surrounded by a lymphocyte rim, with normal alveolar tissue beyond it.</li>
-    <li><b>Granulomas mature toward organized lymphoid tissue.</b> B cells rise over time (about 14% of cells at day 90), together with the TLS/iBALT program and a B-cell-dominated niche.</li>
-    <li><b>The pipeline works end to end</b> on 2.4 million cells and is ready to apply to <i>Pneumocystis</i> Xenium data.</li>
+    <li><b>Myeloid enrichment in WT infection.</b> WT-infected sections show markedly higher proportions of monocytes and of the general macrophage population (excluding alveolar macrophages, which are annotated separately) relative to uninfected sections, where these two populations are rare (Figure 5).</li>
+    <li><b>Spatial compartmentalization around putative lesion regions.</b> Distance-based profiling suggests a myeloid-rich central compartment, surrounding lymphocyte enrichment, and greater representation of alveolar epithelial cells at increasing distances (Figure 7).</li>
+    <li><b>Greater B-cell representation at later granuloma time points.</b> Later granuloma time points show higher section-level B-cell proportions and elevated TLS/iBALT program scores, suggesting candidate lymphoid organization that requires further validation (Figures 5, 6, 8).</li>
+    <li><b>An end-to-end workflow at large cellular scale.</b> The workflow processes approximately 2.4 million cells across 11 tissue sections and provides a foundation for future <i>Pneumocystis</i> spatial analyses.</li>
   </ul>
 </section>
 
@@ -130,25 +159,39 @@
   <h2>Limitations</h2>
   <div class="note">
   <ul style="margin:0">
-    <li>The spatial data are from <i>Cryptococcus</i>, not <i>Pneumocystis</i>. The <i>Pneumocystis</i> scRNA-seq data serve only as an annotation reference, so no claims are made about <i>Pneumocystis</i> lesions themselves.</li>
-    <li>Th17 program scores were very low on this panel, so no conclusions are drawn about Th17 cells.</li>
-    <li>There are only 2–3 sections per condition, so results are descriptive rather than formally powered.</li>
-    <li>Cell labels come from label transfer plus marker checks; rare or transitional states may be merged.</li>
+    <li>This analysis uses <i>Cryptococcus</i>-infected lung tissue and does not establish the spatial organization of <i>Pneumocystis</i> infection. The <i>Pneumocystis</i> single-cell datasets serve as annotation references; differences between infection models may affect the transferability of finer cell-state labels.</li>
+    <li>Lesion-associated regions are defined computationally from cellular composition rather than independently confirmed fungal localization. Their spatial profiles should therefore be interpreted in the context of the region-selection criteria.</li>
+    <li>The targeted Xenium panel constrains the genes available for annotation and gene-program scoring (for example, <i>Clec7a</i>/Dectin-1, <i>Spp1</i>, <i>Sftpc</i> and <i>S100a8/9</i> are absent). Low scores, including those observed for the Th17 program, are not interpreted as evidence of biological absence.</li>
+    <li>With two to three sections per experimental group, the findings are descriptive. The biological replicate structure is not specified in the source data and should be considered when interpreting between-group differences; rare or transitional cell states may remain unresolved.</li>
   </ul></div>
 </section>
 
 <section id="next">
   <h2>Next steps</h2>
   <ul>
-    <li>Apply the pipeline to <i>Pneumocystis</i>-infected lung Xenium data from the Kolls lab.</li>
-    <li>Test whether Trem2-high macrophages and IL-17/IL-22 programs form niches around <i>Pneumocystis</i> foci.</li>
-    <li>Link genes enriched in lesion niches to circulating cell-free RNA candidates for diagnostics.</li>
+    <li>Adapt and validate the workflow using <i>Pneumocystis</i>-infected lung Xenium data from our lab.</li>
+    <li>Evaluate the spatial distribution of Trem2-high macrophage states and IL-17/IL-22-associated programs, subject to panel coverage.</li>
+    <li>Validate candidate lesion and lymphoid niches using complementary tissue-level measurements (e.g., histology or fungal staining).</li>
+    <li>Prioritize niche-associated transcripts for evaluation in circulating cell-free RNA datasets and subsequent biomarker validation.</li>
   </ul>
+</section>
+
+<section id="refs">
+  <h2>References</h2>
+  <ol style="font-size:.93rem">
+    <li>Brauer VS, Takemura K, Rosati B, Cavalcanti-Neto MP, Dasilva D, Singh N, Normile T, Vaccaro G, Caso G, Singh H, Chen B, Ojima I, McKinnon D, Del Poeta M. Transcriptomic and lipidomic analysis of the cryptococcal lung granuloma reveals macrophage boundary programs and sphingolipid remodeling. <i>Nature Communications</i>. 2026. <a href="https://doi.org/10.1038/s41467-026-73516-z">doi:10.1038/s41467-026-73516-z</a>; <a href="https://pubmed.ncbi.nlm.nih.gov/42209491/">PMID 42209491</a>. Dataset: <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE328931">GSE328931</a>.</li>
+    <li>Yang HQ, Sun H, Li K, Shao MM, Zhai K, Tong ZH. Dynamics of host immune responses and a potential function of Trem2hi interstitial macrophages in <i>Pneumocystis</i> pneumonia. <i>Respiratory Research</i>. 2024. <a href="https://doi.org/10.1186/s12931-024-02709-1">doi:10.1186/s12931-024-02709-1</a>. Dataset: <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE157627">GSE157627</a>.</li>
+    <li>Wang Y, Li K, Zhao W, Liu Y, Li T, Yang HQ, Tong Z, Song N. Integrated multi-omics analyses reveal the altered transcriptomic characteristics of pulmonary macrophages in immunocompromised hosts with <i>Pneumocystis</i> pneumonia. <i>Frontiers in Immunology</i>. 2023. <a href="https://doi.org/10.3389/fimmu.2023.1179094">doi:10.3389/fimmu.2023.1179094</a>. Dataset: <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE225246">GSE225246</a>.</li>
+    <li>Domínguez Conde C, Xu C, Jarvis LB, <i>et al.</i> Cross-tissue immune cell analysis reveals tissue-specific features in humans. <i>Science</i>. 2022. <a href="https://doi.org/10.1126/science.abl5197">doi:10.1126/science.abl5197</a>. Software: CellTypist.</li>
+    <li>Palla G, Spitzer H, Klein M, <i>et al.</i> Squidpy: a scalable framework for spatial omics analysis. <i>Nature Methods</i>. 2022. <a href="https://doi.org/10.1038/s41592-021-01358-2">doi:10.1038/s41592-021-01358-2</a>. Software: Squidpy.</li>
+    <li>Wolf FA, Angerer P, Theis FJ. SCANPY: large-scale single-cell gene expression data analysis. <i>Genome Biology</i>. 2018. <a href="https://doi.org/10.1186/s13059-017-1382-0">doi:10.1186/s13059-017-1382-0</a>. Software: scanpy.</li>
+    <li>Korsunsky I, Millard N, Fan J, <i>et al.</i> Fast, sensitive and accurate integration of single-cell data with Harmony. <i>Nature Methods</i>. 2019. <a href="https://doi.org/10.1038/s41592-019-0619-0">doi:10.1038/s41592-019-0619-0</a>. Software: Harmony.</li>
+  </ol>
 </section>
 </main>
 
 <footer>
-  Md Biplob Hosen · Kolls Lab, Tulane University · Public data only ·
+  Md Biplob Hosen · Kolls Lab, Tulane University · Analysis of publicly available datasets ·
   <a href="https://github.com/Biplob1120/pcp-xenium-spatial">Source code on GitHub</a>
 </footer>
 </body>
